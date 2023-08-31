@@ -69,14 +69,14 @@ class DirectoryCommands:
                 path = self.process_path(command_args[1])
                 deleted = self.delete(self.root_node, path)
                 if not deleted:
-                    raise SystemError("error")
+                    print(f"Cannot delete {command_args[1]} - does not exist")
 
                 return self.root_node
 
             case COMMANDS.MOVE.value:
                 path = self.process_path(command_args[1])
-                parent = path[len(path) - 1]
-                child = command_args[2]
+                child = path[len(path) - 1]
+                parent = command_args[2]
                 return self.move(self.root_node, parent, child)
 
             case _:
@@ -119,6 +119,11 @@ class DirectoryCommands:
         parent_node = node
         for each in dir:
             if each != parent_node.parent:
+                existing_node = self.search(parent_node, each)
+                if existing_node:
+                    parent_node = existing_node
+                    continue  # This is essential to ensure dirs don't duplicate
+
                 child_node = Node(each)
                 parent_node.children.append(child_node)
                 parent_node = child_node
